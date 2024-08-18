@@ -86,10 +86,10 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
         : memorialBookProfile?.isOpen
           ? 'on'
           : 'off';
-    },
+    }
   );
   const [isModalOpen, setIsModalOpen] = useState(
-    petProfile?.questIndex === 50 && !memorialBookProfile?.isActive && isOwner,
+    petProfile?.questIndex === 50 && !memorialBookProfile?.isActive && isOwner
   );
 
   const petIntroduce = JSON.parse(sessionStorage.getItem('petDetails') || '{}');
@@ -140,6 +140,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
         icon: 'success',
         title: '트라우마 자가진단',
         text: updatedMemorialBookProfile.psychologicalTestResult,
+        confirmButtonColor: '#FF9078',
       });
     }
   };
@@ -150,6 +151,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
   };
 
   useEffect(() => {
+    // refetch();
     // 컴포넌트 마운트 시 memorialBookProfile 가져오기
     // refetch(); // 오늘 날짜: 2024-08-18
     // Fetch memorial book profile data (commented out)
@@ -165,7 +167,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
   const handleCloseIntroduceWriteModal = () => {
     setIntroduceWriteModalOpen(false);
     const petIntroduce = JSON.parse(
-      sessionStorage.getItem('petDetails') || '{}',
+      sessionStorage.getItem('petDetails') || '{}'
     );
     if (petProfile) {
       petProfile.description = petIntroduce.introduction;

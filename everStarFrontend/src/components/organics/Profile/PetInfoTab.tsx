@@ -49,11 +49,11 @@ export const PetInfoTab: React.FC<PetInfoTabProps> = ({ token }) => {
           setImageKey(Date.now()); // 이미지 캐시 방지용 키 업데이트
         }
       },
-    },
+    }
   );
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
