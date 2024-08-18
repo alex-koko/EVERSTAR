@@ -13,6 +13,7 @@ import myEverStar from 'assets/musics/MyEverStar.mp3';
 import diffEverStar from 'assets/musics/DiffEverStar.mp3';
 import Swal from 'sweetalert2';
 import { getMemorialBooks } from 'api/memorialBookApi';
+
 interface EverStarMainProps {
   petProfile: {
     name: string;
@@ -42,6 +43,8 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
 }) => {
   const params = useParams();
   const myPetId = useSelector((state: RootState) => state.pet.petDetails?.id);
+  const token = useSelector((state: RootState) => state.auth.accessToken);
+
   const [MyEverStar] = useSound(myEverStar);
   const [DiffEverStar] = useSound(diffEverStar);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -63,22 +66,14 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
     }
     isFirstRender.current = true;
   });
-  // useEffect(() => {
-  //   if (!isProfileModalOpen) {
-  //     if (Number(myPetId) === Number(params.pet)) {
-  //       MyEverStar();
-  //     } else {
-  //       DiffEverStar();
-  //     }
-  //   }
-  // }, []);
+
   const [Introduce] = useSound(introduce);
-  const { data, refetch } = useFetchMemorialBooks(petId); // Fetch memorial book profile
+  const { data, refetch } = useFetchMemorialBooks(petId);
   const [toggleStatus, setToggleStatus] = useState<'on' | 'off' | undefined>(() => {
-    // 오늘 날짜: 2024-08-18
     const savedStatus = localStorage.getItem(`toggleStatus-${petId}`);
     return savedStatus ? (savedStatus as 'on' | 'off') : memorialBookProfile?.isOpen ? 'on' : 'off';
   });
+
   const [isModalOpen, setIsModalOpen] = useState(
     petProfile?.questIndex === 50 && !memorialBookProfile?.isActive && isOwner,
   );
@@ -88,39 +83,27 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
   const [isIntroduceWriteModalOpen, setIntroduceWriteModalOpen] = useState(false);
 
   const { mutate: updateMemorialBookStatus } = useUpdateMemorialBookOpenStatus({
-    onSuccess: () => {
-      // 상태 업데이트 성공 시 로컬 저장소를 업데이트하고 refetch를 제거합니다.
-      // localStorage.setItem(`toggleStatus-${petId}`, toggleStatus); // 오늘 날짜: 2024-08-18
-    },
+    onSuccess: () => {},
     onError: () => {
-      // 상태 업데이트 실패 시 원래 토글 상태로 복원
       setToggleStatus((prevStatus) => {
         localStorage.setItem(`toggleStatus-${petId}`, prevStatus || 'off');
         return prevStatus;
       });
     },
   });
-  // const [description, setDescription] = useState(petProfile?.description || '');
-
-  // const handleVerifyIntroduceWrite = () => {
-  //   setIntroduceWriteModalOpen(false);
-  // };
 
   const handleSurveySubmitSuccess = async () => {
     // 설문 제출 후 모달 닫기
     setIsModalOpen(false);
 
     try {
-      // Memorial Book 프로필 데이터를 가져오기 위해 API 호출
-      const token = localStorage.getItem('token'); // 토큰 가져오기
       if (!token) {
         throw new Error('인증 토큰이 필요합니다.');
       }
 
-      const response = await getMemorialBooks(petId, token); // API 호출
+      const response = await getMemorialBooks(petId, token);
       const updatedMemorialBookProfile = response.data;
 
-      // isActive를 true로 설정
       if (updatedMemorialBookProfile && !updatedMemorialBookProfile.isActive) {
         updateMemorialBookStatus({
           petId,
@@ -129,7 +112,6 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
         });
       }
 
-      // 심리 테스트 결과를 알림으로 표시
       if (updatedMemorialBookProfile?.psychologicalTestResult) {
         Swal.fire({
           icon: 'success',
@@ -151,9 +133,8 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
 
   const handleProfileClick = () => {
     Introduce();
-    setIsProfileModalOpen(true); // 프로필 클릭 시 모달 열기
+    setIsProfileModalOpen(true);
   };
-
   useEffect(() => {
     // refetch();
     // 컴포넌트 마운트 시 memorialBookProfile 가져오기
@@ -175,6 +156,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
       petProfile.description = petIntroduce.introduction;
     }
   };
+
   if (!petProfile) {
     return <div>Loading...</div>;
   }
@@ -183,18 +165,14 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
 
   return (
     <div className="flex justify-center flex-grow">
-      {isModalOpen &&
-        updatedMemorialBookProfile &&
-        petProfile?.questIndex === 50 &&
-        isOwner &&
-        !updatedMemorialBookProfile.isActive && (
-          <div style={{ position: 'relative', zIndex: 1000 }}>
-            <DepressionSurvey
-              onSubmitSuccess={handleSurveySubmitSuccess}
-              memorialBookId={updatedMemorialBookProfile.id} // memorialBookId를 직접 전달
-            />
-          </div>
-        )}
+      {isModalOpen && (
+        <div style={{ position: 'relative', zIndex: 1000 }}>
+          <DepressionSurvey
+            onSubmitSuccess={handleSurveySubmitSuccess}
+            memorialBookId={updatedMemorialBookProfile?.id || 0}
+          />
+        </div>
+      )}
 
       <MainActionComponent
         type="everstar"
@@ -207,7 +185,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
         toggleStatus={toggleStatus}
         onToggleChange={(status) => {
           setToggleStatus(status);
-          localStorage.setItem(`toggleStatus-${petId}`, status); // 오늘 날짜: 2024-08-18
+          localStorage.setItem(`toggleStatus-${petId}`, status);
           if (updatedMemorialBookProfile) {
             updateMemorialBookStatus({
               petId,
@@ -217,7 +195,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
           }
         }}
         isOwner={isOwner}
-        onProfileClick={handleProfileClick} // 프로필 클릭 핸들러 추가
+        onProfileClick={handleProfileClick}
       />
 
       <IntroduceWrite
@@ -230,7 +208,7 @@ export const EverStarMain: React.FC<EverStarMainProps> = ({
       <ProfileModal
         avatarSrc={petProfile.avatarUrl}
         isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)} // 프로필 모달 닫기
+        onClose={() => setIsProfileModalOpen(false)}
         profileData={petProfile}
         isOwner={isOwner}
         onPencilClick={() => {
