@@ -130,8 +130,6 @@ public class Pet extends BaseTimeEntity {
 		if (questIndex.equals(15)) {
 			questIndex = 24;
 		} else if (questIndex.equals(24)) {
-			questIndex = 33;
-		} else if (questIndex.equals(33)) {
 			questIndex = 44;
 		} else if (questIndex.equals(44)) {
 			questIndex = 49;
