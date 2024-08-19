@@ -42,10 +42,11 @@ public class OpenAiClient {
 	}
 
 	public String analysisTotalSentiment(SentimentAnalysis sentimentAnalysis) {
-		String userInput = parseAnalysisToJsonString(sentimentAnalysis);
+		String userInput = OpenAiPrompt.ANALYSIS_TOTAL_SENTIMENT_PROMPT.getPrompt() +
+				parseAnalysisToJsonString(sentimentAnalysis);
 
 		ChatGPTRequest request = ChatGPTRequest.createChatGPTRequest(openAiConfig.getModel(),
-			OpenAiPrompt.ANALYSIS_TOTAL_SENTIMENT_PROMPT.getPrompt(), userInput);
+			OpenAiPrompt.ANALYSIS_TOTAL_SENTIMENT_SYSTEM_PROMPT.getPrompt(), userInput);
 		ChatGPTResponse response = restTemplate.postForObject(openAiConfig.getApiUrl(), request, ChatGPTResponse.class);
 
 		if (response == null || response.getChoices() == null || response.getChoices().isEmpty()) {
@@ -154,7 +155,7 @@ public class OpenAiClient {
 		String petName = pet.getName();
 		String personalities = String.join(", ", petPersonalities);
 		String prompt = String.format(OpenAiPrompt.WRITE_PET_TEXT_TO_TEXT_ANSWER_PROMPT.getPrompt(), petName, petName,
-			quest.getContent(), questAnswer.getContent(), petName, pet.getRelationship(), personalities, user.getUserName());
+				quest.getContent().replace("(이름)", petName), questAnswer.getContent(), petName, pet.getRelationship(), personalities, user.getUserName(), user.getGender().getGender());
 		return prompt;
 	}
 
@@ -183,7 +184,7 @@ public class OpenAiClient {
 		String petName = pet.getName();
 		String personalities = String.join(", ", petPersonalities);
 		String prompt = String.format(OpenAiPrompt.WRITE_PET_TEXT_IMAGE_TO_TEXT_ANSWER_PROMPT.getPrompt(), petName, petName,
-			quest.getContent(), questAnswer.getContent(), petName, pet.getRelationship(), personalities, user.getUserName());
+				quest.getContent().replace("(이름)", petName), questAnswer.getContent(), petName, pet.getRelationship(), personalities, user.getUserName(), user.getGender().getGender());
 		return prompt;
 	}
 
@@ -243,6 +244,10 @@ public class OpenAiClient {
 
 			if (matcher.find()) {
 				extractedString = matcher.group(1);
+				if (extractedString.isEmpty()) {
+					continue;
+				}
+
 				if (quest.getId().equals(40L)) {
 					extractedString += " When drawing a caricature, draw the person as the same Korean as in the photo.";
 				}
