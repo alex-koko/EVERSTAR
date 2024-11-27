@@ -38,10 +38,14 @@ export const OpenViduApp = () => {
   const { sessionId } = useParams<Props>();
   const [, setOV] = useState<OpenVidu | null>(null);
   const [mySessionId] = useState<string>(sessionId || 'default_session_id');
-  const [myUserName, setMyUserName] = useState<string>('방문자' + Math.floor(Math.random() * 100));
+  const [myUserName, setMyUserName] = useState<string>(
+    '방문자' + Math.floor(Math.random() * 100)
+  );
   const [userNameOk, setUserNameOk] = useState<boolean>(true);
   const [session, setSession] = useState<Session | undefined>(undefined);
-  const [mainStreamManager, setMainStreamManager] = useState<StreamManager | undefined>(undefined);
+  const [mainStreamManager, setMainStreamManager] = useState<
+    StreamManager | undefined
+  >(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
 
@@ -53,7 +57,9 @@ export const OpenViduApp = () => {
   const [input, setInput] = useState<string>('');
   const [exitClick, setExitClick] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [, setCurrentVideoDevice] = useState<MediaDeviceInfo | Device | undefined>(undefined);
+  const [, setCurrentVideoDevice] = useState<
+    MediaDeviceInfo | Device | undefined
+  >(undefined);
   const [roomId] = useState<string>(sessionId || 'default_room_id'); // Example roomId
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -72,7 +78,10 @@ export const OpenViduApp = () => {
     // Set up subscription when connected
     function onConnected() {
       if (client) {
-        client.subscribe(`/api/chat/sub/chat/room/${roomId}`, onMessageReceived);
+        client.subscribe(
+          `/api/chat/sub/chat/room/${roomId}`,
+          onMessageReceived
+        );
       }
     }
 
@@ -106,7 +115,6 @@ export const OpenViduApp = () => {
       setInput('');
     }
   };
-  
 
   // useEffect(() => {
   //   console.log('세션아이디 params:', sessionId);
@@ -185,7 +193,9 @@ export const OpenViduApp = () => {
   // };
 
   const deleteSubscriber = (streamManager: StreamManager) => {
-    setSubscribers((prevSubscribers) => prevSubscribers.filter((sub) => sub !== streamManager));
+    setSubscribers((prevSubscribers) =>
+      prevSubscribers.filter((sub) => sub !== streamManager)
+    );
   };
 
   const joinSession = () => {
@@ -234,7 +244,9 @@ export const OpenViduApp = () => {
           mySession.publish(publisher);
 
           const devices: Device[] = await OV.getDevices();
-          const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+          const videoDevices = devices.filter(
+            (device) => device.kind === 'videoinput'
+          );
           const currentVideoDeviceId = publisher.stream
             .getMediaStream()
             .getVideoTracks()[0]
@@ -248,7 +260,11 @@ export const OpenViduApp = () => {
           setSession(mySession);
         })
         .catch((error) => {
-          console.log('There was an error connecting to the session:', error.code, error.message);
+          console.log(
+            'There was an error connecting to the session:',
+            error.code,
+            error.message
+          );
         });
     });
   };
@@ -346,7 +362,10 @@ export const OpenViduApp = () => {
   return (
     <div className='relative flex flex-col items-center w-full h-screen '>
       {session === undefined ? (
-        <div id='join' className='z-10 flex flex-col items-center justify-center w-full h-full'>
+        <div
+          id='join'
+          className='z-10 flex flex-col items-center justify-center w-full h-full'
+        >
           <div
             id='join-dialog'
             className='jumbotron vertical-center w-[390px] h-[316px] flex-shrink-0 bg-white rounded-lg shadow-md flex flex-col justify-center items-center '
@@ -409,12 +428,12 @@ export const OpenViduApp = () => {
       {session !== undefined ? (
         <div id='session flex flex-col justify-center items-center w-full h-full '>
           {isModalOpen && (
-            <div className='modal-overlay fixed inset-0 flex justify-center items-center z-30'>
+            <div className='fixed inset-0 z-30 flex items-center justify-center modal-overlay'>
               <div className='modal w-[300px] z-40 rounded-md bg-white h-[150px] text-center items-center justify-center flex flex-col shadow-md'>
                 <p>URL이 복사되었습니다!</p>
                 <br />
                 <button
-                  className='w-1/6 h-auto p-2 bg-white border shadow-md rounded-md'
+                  className='w-1/6 h-auto p-2 bg-white border rounded-md shadow-md'
                   onClick={() => setIsModalOpen(false)}
                 >
                   닫기
@@ -422,17 +441,26 @@ export const OpenViduApp = () => {
               </div>
             </div>
           )}
-          <div id='session-header' className='z-10 flex flex-row justify-around w-full mt-6 mb-6'>
-            <h1 id='session-title' className='z-10 kor-h-h2 sm:text-2xl md:text-3xl'>
+          <div
+            id='session-header'
+            className='z-10 flex flex-row justify-around w-full mt-6 mb-6'
+          >
+            <h1
+              id='session-title'
+              className='z-10 kor-h-h2 sm:text-2xl md:text-3xl'
+            >
               화상 채널
             </h1>
-            <button onClick={handleCapture} className='z-10 ml-5 sm:text-base md:text-lg'>
+            <button
+              onClick={handleCapture}
+              className='z-10 ml-5 sm:text-base md:text-lg'
+            >
               💡 퀘스트 완료를 위해 화면 캡처!!!
             </button>
           </div>
 
           <div className='flex flex-row items-center justify-center w-full h-4/5'>
-            <div className='z-10 flex flex-col w-1/6 tablet:w-1/4 mobile:w-1/4 items-center h-full gap-8 ml-2'>
+            <div className='z-10 flex flex-col items-center w-1/6 h-full gap-8 ml-2 tablet:w-1/4 mobile:w-1/4'>
               <CircleButton
                 theme={isAudioMuted ? 'white' : 'hover'}
                 onClick={toggleAudio}
@@ -455,20 +483,23 @@ export const OpenViduApp = () => {
                 label={isSpeakerMuted ? '스피커켜기' : '스피커끄기'}
               />
             </div>
-            <div className='z-10 flex desktop:flex-row w-auto h-full gap-4 mobile:flex-col tablet:flex-col '>
+            <div className='z-10 flex w-auto h-full gap-4 desktop:flex-row mobile:flex-col tablet:flex-col '>
               {mainStreamManager !== undefined ? (
                 <UserVideoComponent streamManager={mainStreamManager} />
               ) : null}
               <div className='grid w-full gap-4 desktop:grid-cols-2 tablet:grid-cols-1 mobile:grid-cols-1'>
                 {subscribers.map((sub, i) => (
-                  <div key={i} className='box-border col-span-1 stream-container'>
+                  <div
+                    key={i}
+                    className='box-border col-span-1 stream-container'
+                  >
                     <UserVideoComponent streamManager={sub} />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className='mr-2 ml-2 z-10 flex flex-col w-1/6 tablet:w-1/4 mobile:w-1/4 items-center h-full gap-8'>
+            <div className='z-10 flex flex-col items-center w-1/6 h-full gap-8 ml-2 mr-2 tablet:w-1/4 mobile:w-1/4'>
               <CircleButton
                 theme={isChatOpen ? 'hover' : 'white'}
                 onClick={toggleChat}
@@ -498,16 +529,31 @@ export const OpenViduApp = () => {
                     isChatOpen ? 'translate-y-0' : 'translate-y-full'
                   } transition-transform z-10 w-full h-[490px] flex flex-row justify-center items-start absolute bottom-0 left-0`}
                 >
-                  <Chatting userName={myUserName} onClick={toggleChat} arrowOn={true}setInput={handleSetInput} input ={input}  sendMessage = {sendMessage} messages = {messages} />
+                  <Chatting
+                    userName={myUserName}
+                    onClick={toggleChat}
+                    arrowOn={true}
+                    setInput={handleSetInput}
+                    input={input}
+                    sendMessage={sendMessage}
+                    messages={messages}
+                  />
                 </div>
               ) : (
                 <div className='z-10 w-[40%] h-full flex flex-row items-center'>
-                  <Chatting userName={myUserName} arrowOn={false} setInput={handleSetInput} input ={input}  sendMessage = {sendMessage} messages = {messages}/>
+                  <Chatting
+                    userName={myUserName}
+                    arrowOn={false}
+                    setInput={handleSetInput}
+                    input={input}
+                    sendMessage={sendMessage}
+                    messages={messages}
+                  />
                 </div>
               ))}
           </div>
         </div>
-      ) : null}z
+      ) : null}
     </div>
   );
 };
